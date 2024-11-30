@@ -32,7 +32,12 @@ export function NavUser({
   const router = useRouter();
 
   const handleLogout = () => {
-    localStorage.clear();
+    // Очистка только конкретных данных, если необходимо
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("login");
+    localStorage.removeItem("role");
+
+    // Перенаправление на страницу логина
     router.push(`/login`);
   };
 
@@ -46,9 +51,13 @@ export function NavUser({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                {/* Если аватар пустой, показываем инициал */}
+                <AvatarImage
+                  src={user.avatar || "/default-avatar.png"}
+                  alt={user.name}
+                />
                 <AvatarFallback className="rounded-lg">
-                  {user.avatar.slice(0, 2).toUpperCase()}
+                  {user.avatar ? user.avatar.slice(0, 2).toUpperCase() : "AA"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -67,9 +76,12 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage
+                    src={user.avatar || "/default-avatar.png"}
+                    alt={user.name}
+                  />
                   <AvatarFallback className="rounded-lg">
-                    {user.avatar.slice(0, 2).toUpperCase()}
+                    {user.avatar ? user.avatar.slice(0, 2).toUpperCase() : "AA"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -79,7 +91,7 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleLogout()}>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut />
               Выйти
             </DropdownMenuItem>

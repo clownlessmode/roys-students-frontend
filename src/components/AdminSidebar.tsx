@@ -15,7 +15,14 @@ import {
 export function AdminSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const login = localStorage.getItem("login");
+  const [login, setLogin] = React.useState<string | null>(null);
+
+  // Используем useEffect, чтобы выполнить код только на клиенте
+  React.useEffect(() => {
+    const storedLogin = localStorage.getItem("login");
+    setLogin(storedLogin);
+  }, []);
+
   const data = {
     user: {
       name: "Администратор",

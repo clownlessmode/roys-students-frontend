@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthController } from "./entity/controllers/auth.controller";
 import Spinner from "./ui/Spinner";
 
@@ -31,30 +32,31 @@ export function LoginForm() {
     reset,
     formState: { errors, isValid },
   } = useForm<FormValues>({ mode: "onChange" });
-
   const { login, isLoggingIn } = useAuthController();
+
+  const [isClient, setIsClient] = useState(false); // Для того чтобы убедиться, что код работает только на клиенте
 
   const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
     const res = await login({
       login: data.login,
       password: data.password,
     });
-    console.log(res);
+
+    // Устанавливаем данные в localStorage
     localStorage.setItem("access_token", res.access_token);
     localStorage.setItem("login", data.login);
     localStorage.setItem("role", res.role);
-    document.cookie = `role=${res.role}; path=/; secure; samesite=lax`;
 
+    // Ожидаем, что role это "admin" или что-то другое, формируем ссылку на основе роли
     const prefix = res.role === "admin" ? "/curators" : "";
-    console.log(prefix);
-
     router.push(`/${res.role}${prefix}`);
-    console.log('pushed');
-
     reset();
   };
 
   useEffect(() => {
+    // Ставим флаг, чтобы определить, что код выполняется на клиенте
+    setIsClient(true);
+
     const params = new URLSearchParams(window.location.search);
     const login = params.get("login") || "";
     const password = params.get("password") || "";
@@ -62,7 +64,7 @@ export function LoginForm() {
     if (login) setValue("login", login);
     if (password) setValue("password", password);
 
-    // Automatically trigger validation and submit if valid
+    // Если параметры есть, сразу пытаемся авторизовать пользователя
     if (login && password) {
       trigger().then((isValid) => {
         if (isValid) {
@@ -70,8 +72,11 @@ export function LoginForm() {
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setValue, trigger]);
+
+  if (!isClient) {
+    return null; // Чтобы избежать ошибок на сервере
+  }
 
   return (
     <div className="flex flex-col justify-between h-screen py-10">

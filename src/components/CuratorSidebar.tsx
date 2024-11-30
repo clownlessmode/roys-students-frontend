@@ -15,7 +15,13 @@ import {
 export function CuratorSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const login = localStorage.getItem("login");
+  const [login, setLogin] = React.useState<string | null>(null);
+
+  // Используем useEffect для получения логина из localStorage только на клиенте
+  React.useEffect(() => {
+    const storedLogin = localStorage.getItem("login");
+    setLogin(storedLogin);
+  }, []);
   const data = {
     user: {
       name: "Преподаватель",
