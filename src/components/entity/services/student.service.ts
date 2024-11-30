@@ -1,12 +1,6 @@
 import { baseApi } from "@/components/providers/base-api";
 import { UpdateStudentDto } from "../dto/update-student.dto";
-
-interface CreateStudentDto {
-  first_name: string;
-  last_name: string;
-  patronymic: string;
-  group_id: string;
-}
+import { CreateStudentDto } from "../dto/create-student.dto";
 
 class StudentService {
   static async createStudent(dto: CreateStudentDto) {

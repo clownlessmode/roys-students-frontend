@@ -39,6 +39,7 @@ export function LoginForm() {
       login: data.login,
       password: data.password,
     });
+    console.log(res)
     localStorage.setItem("access_token", res.access_token);
     localStorage.setItem("login", data.login);
     localStorage.setItem("role", res.role);

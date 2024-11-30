@@ -1,3 +1,3 @@
-import { CreateGroupDto } from "../../../../../backend/src/group/dto/create-group.dto";
+import { CreateGroupDto } from "./create-group.dto";
 
 export type UpdateGroupDto = Partial<CreateGroupDto>;

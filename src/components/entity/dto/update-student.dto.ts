@@ -1,3 +1,3 @@
-import { CreateStudentDto } from "../../../../../backend/src/student/dto/createStudent.dto";
+import { CreateStudentDto } from "./create-student.dto";
 
 export type UpdateStudentDto = Partial<CreateStudentDto>;

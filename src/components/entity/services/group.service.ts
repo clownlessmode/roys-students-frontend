@@ -1,11 +1,7 @@
 import { baseApi } from "@/components/providers/base-api";
 import { UpdateGroupDto } from "../dto/update-group.dto";
 import { Group } from "../types/group.interface";
-
-interface CreateGroupDto {
-  name: string;
-  curator_id: string;
-}
+import { CreateGroupDto } from "../dto/create-group.dto";
 
 class GroupService {
   static async createGroup(dto: CreateGroupDto) {

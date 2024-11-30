@@ -1,12 +1,7 @@
 // src/admin/services/admin.service.ts
 import { baseApi } from "@/components/providers/base-api";
 import { DefaultEntity } from "../types/default.entity";
-
-interface CreateAdminDto {
-  key: string;
-  login: string;
-  password: string;
-}
+import { CreateAdminDto } from "../dto/create-admin.dto";
 
 class AdminService {
   // Метод для создания администратора

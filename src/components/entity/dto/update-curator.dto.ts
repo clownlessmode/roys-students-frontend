@@ -1,3 +1,3 @@
-import { CreateCuratorDto } from "../../../../../backend/src/curator/dto/create-curator.dto";
+import { CreateCuratorDto } from "./create-curator.dto";
 
 export type UpdateCuratorDto = Partial<CreateCuratorDto>;

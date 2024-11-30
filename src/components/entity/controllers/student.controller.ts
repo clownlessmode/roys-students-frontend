@@ -5,7 +5,7 @@ import { ApiError } from "next/dist/server/api-utils";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { UpdateStudentDto } from "../dto/update-student.dto";
-import { CreateStudentDto } from "../../../../../backend/src/student/dto/createStudent.dto";
+import { CreateStudentDto } from "../dto/create-student.dto";
 
 export const useStudentController = () => {
   const queryClient = useQueryClient();

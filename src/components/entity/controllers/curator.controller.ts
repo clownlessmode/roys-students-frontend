@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import CuratorService from "../services/curator.service";
 import { Curator } from "../types/curator.interface";
-import { CreateCuratorDto } from "../../../../../backend/src/curator/dto/create-curator.dto";
 import { ApiError } from "next/dist/server/api-utils";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { UpdateCuratorDto } from "../dto/update-curator.dto";
+import { CreateCuratorDto } from "../dto/create-curator.dto";
 
 export const useCuratorController = () => {
   const queryClient = useQueryClient();

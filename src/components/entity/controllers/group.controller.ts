@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import GroupService from "../services/group.service";
 import { Group } from "../types/group.interface";
-import { CreateGroupDto } from "../../../../../backend/src/group/dto/create-group.dto";
 import { ApiError } from "next/dist/server/api-utils";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 import { UpdateGroupDto } from "../dto/update-group.dto";
+import { CreateGroupDto } from "../dto/create-group.dto";
 
 export const useGroupController = () => {
   const queryClient = useQueryClient();

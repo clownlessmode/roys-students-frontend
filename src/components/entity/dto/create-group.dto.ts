@@ -1,5 +1,4 @@
-export interface CreateAdminDto {
-  key: string;
-  login: string;
-  password: string;
+export interface CreateGroupDto {
+  name: string;
+  curator_id: string;
 }
