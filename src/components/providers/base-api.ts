@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseApi = axios.create({
-  baseURL: "https://r6nt2plp-3000.asse.devtunnels.ms/api",
+  baseURL: "http://213.176.66.87:3000/api",
 });
 
 baseApi.interceptors.request.use((config) => {
