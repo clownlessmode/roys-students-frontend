@@ -39,14 +39,18 @@ export function LoginForm() {
       login: data.login,
       password: data.password,
     });
-    console.log(res)
+    console.log(res);
     localStorage.setItem("access_token", res.access_token);
     localStorage.setItem("login", data.login);
     localStorage.setItem("role", res.role);
     document.cookie = `role=${res.role}; path=/; secure; samesite=lax`;
 
     const prefix = res.role === "admin" ? "/curators" : "";
+    console.log(prefix);
+
     router.push(`/${res.role}${prefix}`);
+    console.log('pushed');
+
     reset();
   };
 
