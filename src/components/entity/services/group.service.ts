@@ -1,7 +1,11 @@
 import { baseApi } from "@/components/providers/base-api";
-import { CreateGroupDto } from "../../../../../backend/src/group/dto/create-group.dto";
 import { UpdateGroupDto } from "../dto/update-group.dto";
 import { Group } from "../types/group.interface";
+
+interface CreateGroupDto {
+  name: string;
+  curator_id: string;
+}
 
 class GroupService {
   static async createGroup(dto: CreateGroupDto) {

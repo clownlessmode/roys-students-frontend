@@ -1,7 +1,14 @@
 import { baseApi } from "@/components/providers/base-api";
-import { CreateCuratorDto } from "../../../../../backend/src/curator/dto/create-curator.dto";
 import { UpdateCuratorDto } from "../dto/update-curator.dto";
 import { Curator } from "../types/curator.interface";
+
+interface CreateCuratorDto {
+  first_name: string;
+  last_name: string;
+  patronymic: string;
+  login: string;
+  password: string;
+}
 
 class CuratorService {
   static async createCurator(dto: CreateCuratorDto) {
