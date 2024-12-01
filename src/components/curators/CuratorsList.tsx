@@ -139,7 +139,6 @@ export default function CuratorsList({ data, isLoading }: Props) {
                 filteredCurators.map((curator, index) => (
                   <TableRow key={curator.id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{index + 1}</TableCell>
 
                     <TableCell>{curator.first_name}</TableCell>
                     <TableCell>{curator.last_name}</TableCell>
