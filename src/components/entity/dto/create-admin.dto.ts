@@ -3,3 +3,4 @@ export interface CreateAdminDto {
   login: string;
   password: string;
 }
+asdasdasddsadasdsa;
