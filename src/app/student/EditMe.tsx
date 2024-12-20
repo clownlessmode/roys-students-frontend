@@ -13,30 +13,30 @@ import {
 } from "@/components/ui/dialog";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "../ui/label";
-import Spinner from "../ui/Spinner";
-import { useStudentController } from "../entity/controllers/student.controller";
+import { Label } from "@/components/ui/label";
+import Spinner from "@/components/ui/Spinner";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../ui/select";
-import { Skeleton } from "../ui/skeleton";
-import { Group } from "../entity/types/group.interface";
-import { useGroupController } from "../entity/controllers/group.controller";
-import { Gender, Student } from "../entity/types/student.interface";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+} from "@/components/ui/select";
+
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { CalendarIcon } from "lucide-react";
-import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { isValid as isValidDate } from "date-fns";
 import { toast } from "sonner";
+import { Gender, Student } from "@/components/entity/types/student.interface";
+import { useStudentController } from "@/components/entity/controllers/student.controller";
+import { Calendar } from "@/components/ui/calendar";
 
 type FormValues = {
   first_name: string;
@@ -55,7 +55,7 @@ interface Props {
   id: string;
 }
 
-export function UpdateStudent({ id, student }: Props) {
+export function EditMe({ id, student }: Props) {
   const [isOpen, setIsOpen] = React.useState(false);
   const {
     register,
@@ -79,7 +79,6 @@ export function UpdateStudent({ id, student }: Props) {
   });
 
   const { updateStudent, isUpdatingStudent } = useStudentController();
-  const { groups, isGroupsLoading } = useGroupController();
   console.log(student);
   const onSubmit: SubmitHandler<FormValues> = async (data: FormValues) => {
     if (data.birthdate && !isValidDate(new Date(data.birthdate))) {
@@ -100,8 +99,8 @@ export function UpdateStudent({ id, student }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" className="w-full">
-          Изменить студента
+        <Button variant="outline" className="w-full">
+          Заполнить дополнительную информацию
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -113,52 +112,6 @@ export function UpdateStudent({ id, student }: Props) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="last_name">Фамилия</Label>
-            <Input
-              id="last_name"
-              type="text"
-              placeholder="Введите фамилию нового студента"
-              {...register("last_name", {
-                required: "Введите фамилию студента",
-              })}
-            />
-            {errors.last_name && (
-              <p className="text-red-500 text-sm">{errors.last_name.message}</p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="first_name">Имя</Label>
-            <Input
-              id="first_name"
-              type="text"
-              placeholder="Введите имя нового студента"
-              {...register("first_name", {
-                required: "Введите имя студента",
-              })}
-            />
-            {errors.first_name && (
-              <p className="text-red-500 text-sm">
-                {errors.first_name.message}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="patronymic">Отчество</Label>
-            <Input
-              id="patronymic"
-              type="text"
-              placeholder="Введите отчество нового студента"
-              {...register("patronymic", {
-                required: "Введите отчество студента",
-              })}
-            />
-            {errors.patronymic && (
-              <p className="text-red-500 text-sm">
-                {errors.patronymic.message}
-              </p>
-            )}
-          </div>
           <div className="grid gap-2">
             <Label htmlFor="snils">СНИЛС</Label>
             <Input
@@ -175,7 +128,7 @@ export function UpdateStudent({ id, student }: Props) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="passport">Паспорт (серия)</Label>
+            <Label htmlFor="passport">Паспорт серия</Label>
             <Input
               id="passport"
               type="text"
@@ -194,7 +147,7 @@ export function UpdateStudent({ id, student }: Props) {
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="passport">Паспорт (номер)</Label>
+            <Label htmlFor="passport">Паспорт номер</Label>
             <Input
               id="passport"
               type="text"
@@ -276,57 +229,12 @@ export function UpdateStudent({ id, student }: Props) {
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="group_id">Группа</Label>
-            <Controller
-              name="group_id"
-              control={control}
-              rules={{ required: "Выберите группу" }}
-              render={({ field }) => (
-                <>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <SelectTrigger className="">
-                      <SelectValue placeholder="Выберите группу" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Группа</SelectLabel>
-                        {isGroupsLoading ? (
-                          Array(7)
-                            .fill(0)
-                            .map((_, index) => (
-                              <div
-                                key={`loading-${index}`}
-                                className="flex items-center gap-2 py-2"
-                              >
-                                <Skeleton className="w-8 h-8 rounded-full" />
-                                <Skeleton className="w-32 h-4" />
-                              </div>
-                            ))
-                        ) : groups && groups.length > 0 ? (
-                          groups.map((group: Group) => (
-                            <SelectItem key={group.id} value={group.id}>
-                              {group.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="text-center py-4 text-muted-foreground">
-                            Данные не найдены
-                          </div>
-                        )}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </>
-              )}
-            />
-          </div>
           <Button
             type="submit"
             className="w-full"
             disabled={!isValid || isUpdatingStudent}
           >
-            {isUpdatingStudent ? <Spinner /> : "Обновить cтудента"}
+            {isUpdatingStudent ? <Spinner /> : "Заполнить данные"}
           </Button>
         </form>
       </DialogContent>

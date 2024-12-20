@@ -7,10 +7,16 @@ import {
   Users,
   BookOpen,
   LogOut,
+  File,
+  Calendar,
+  UserRound,
 } from "lucide-react";
 import { Student } from "@/components/entity/types/student.interface";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { EditMe } from "./EditMe";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 interface StudentCardProps {
   student: Student;
@@ -81,6 +87,63 @@ export default function StudentProfile({ student }: StudentCardProps) {
                 ? ` (${student.telegram.first_name})`
                 : ""}
             </Badge>
+
+            <Badge
+              variant="outline"
+              className="w-full justify-start text-base font-normal"
+            >
+              <File className="mr-2 h-4 w-4" />
+              СНИЛС: {student.snils || "Не указан"}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="w-full justify-start text-base font-normal"
+            >
+              <File className="mr-2 h-4 w-4" />
+              Паспорт (серия):{" "}
+              {student.passport ? student.passport.slice(0, 4) : "Не указан"}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="w-full justify-start text-base font-normal"
+            >
+              <File className="mr-2 h-4 w-4" />
+              Паспорт (номер):{" "}
+              {student.passport ? student.passport.slice(5) : "Не указан"}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="w-full justify-start text-base font-normal"
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Дата рождения:{" "}
+              {student.birthdate
+                ? `${format(new Date(student.birthdate), "PPP", {
+                    locale: ru,
+                  })}`
+                : "Нет данных"}
+            </Badge>
+
+            <Badge
+              variant="outline"
+              className="w-full justify-start text-base font-normal"
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              Дата рождения:{" "}
+              {student.birthdate
+                ? `${format(new Date(student.birthdate), "PPP", {
+                    locale: ru,
+                  })}`
+                : "Нет данных"}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="w-full justify-start text-base font-normal"
+            >
+              <UserRound className="mr-2 h-4 w-4" />
+              Пол: {student.gender || "Не указан"}
+            </Badge>
+            <EditMe student={student} id={student.id} />
             <Button
               onClick={() => handleLogout()}
               size={"sm"}

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseApi = axios.create({
-  baseURL: "https://r6nt2plp-3000.asse.devtunnels.ms/api",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
 });
 
 baseApi.interceptors.request.use((config) => {

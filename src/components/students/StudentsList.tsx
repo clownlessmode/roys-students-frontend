@@ -23,6 +23,9 @@ import DeleteStudent from "./DeleteStudent";
 import { Student } from "../entity/types/student.interface";
 import { Badge } from "../ui/badge";
 import { Input } from "../ui/input";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import ExportToExcel from "./ExportToExcel";
 
 interface Props {
   data: Student[];
@@ -97,7 +100,10 @@ export default function StudentsList({ data, isLoading }: Props) {
             />
             <Search className="absolute right-4 top-1.5 opacity-15" />
           </div>
-          <AddNewStudent />
+          <div className="flex flex-row gap-2 ml-2">
+            <ExportToExcel data={data} fileName="Список студентов" />
+            <AddNewStudent />
+          </div>
         </div>
 
         <div className="border rounded-lg">
@@ -109,16 +115,27 @@ export default function StudentsList({ data, isLoading }: Props) {
                   Группа
                 </TableHead>
                 <TableHead>Cтатус</TableHead>
-
-                <TableHead onClick={() => handleSort("first_name")}>
-                  Имя
-                </TableHead>
                 <TableHead onClick={() => handleSort("last_name")}>
                   Фамилия
+                </TableHead>
+                <TableHead onClick={() => handleSort("first_name")}>
+                  Имя
                 </TableHead>
                 <TableHead onClick={() => handleSort("patronymic")}>
                   Отчество
                 </TableHead>
+                <TableHead onClick={() => handleSort("snils")}>СНИЛС</TableHead>
+                <TableHead onClick={() => handleSort("passport")}>
+                  Пасспорт (cерия)
+                </TableHead>
+                <TableHead onClick={() => handleSort("passport")}>
+                  Пасспорт (номер)
+                </TableHead>
+                <TableHead onClick={() => handleSort("gender")}>Пол</TableHead>
+                <TableHead onClick={() => handleSort("birthdate")}>
+                  Дата рождения
+                </TableHead>
+
                 <TableHead onClick={() => handleSort("login")}>Логин</TableHead>
                 <TableHead onClick={() => handleSort("password")}>
                   Пароль
@@ -128,18 +145,18 @@ export default function StudentsList({ data, isLoading }: Props) {
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array(7)
+                Array(13)
                   .fill(0)
                   .map((_, index) => (
                     <TableRow key={index}>
-                      {Array(7)
+                      {Array(12)
                         .fill(0)
                         .map((_, index) => {
                           return (
                             <TableCell key={index}>
                               <Skeleton
                                 className={`${
-                                  index !== 6 ? "h-[18px]" : "h-[32px]"
+                                  index !== 13 ? "h-[18px]" : "h-[32px]"
                                 }`}
                               />
                             </TableCell>
@@ -161,9 +178,32 @@ export default function StudentsList({ data, isLoading }: Props) {
                           : "Нет зарегистрирован"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{student.first_name}</TableCell>
                     <TableCell>{student.last_name}</TableCell>
+                    <TableCell>{student.first_name}</TableCell>
                     <TableCell>{student.patronymic}</TableCell>
+                    <TableCell>
+                      {student.snils ? student.snils : "Нет данных"}
+                    </TableCell>
+                    <TableCell>
+                      {student.passport
+                        ? student.passport.slice(0, 4)
+                        : "Нет данных"}
+                    </TableCell>
+                    <TableCell>
+                      {student.passport
+                        ? student.passport.slice(5)
+                        : "Нет данных"}
+                    </TableCell>
+                    <TableCell>
+                      {student.gender ? student.gender : "Нет данных"}
+                    </TableCell>
+                    <TableCell>
+                      {student.birthdate
+                        ? `${format(new Date(student.birthdate), "PPP", {
+                            locale: ru,
+                          })}`
+                        : "Нет данных"}
+                    </TableCell>
                     <TableCell>{student.login}</TableCell>
                     <TableCell>
                       {student.password ? student.password : "Нет пароля"}

@@ -21,6 +21,7 @@ import { UpdateCurator } from "./UpdateCurator";
 import DeleteCurator from "./DeleteCurator";
 import { Curator } from "../entity/types/curator.interface";
 import { Input } from "../ui/input";
+import { Badge } from "../ui/badge";
 
 interface Props {
   data: Curator[];
@@ -98,14 +99,17 @@ export default function CuratorsList({ data, isLoading }: Props) {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead onClick={() => handleSort("first_name")}>
-                  Имя
-                </TableHead>
                 <TableHead onClick={() => handleSort("last_name")}>
                   Фамилия
                 </TableHead>
+                <TableHead onClick={() => handleSort("first_name")}>
+                  Имя
+                </TableHead>
                 <TableHead onClick={() => handleSort("patronymic")}>
                   Отчество
+                </TableHead>
+                <TableHead onClick={() => handleSort("groups")}>
+                  Группы
                 </TableHead>
                 <TableHead onClick={() => handleSort("login")}>Логин</TableHead>
                 <TableHead onClick={() => handleSort("password")}>
@@ -139,10 +143,19 @@ export default function CuratorsList({ data, isLoading }: Props) {
                 filteredCurators.map((curator, index) => (
                   <TableRow key={curator.id}>
                     <TableCell>{index + 1}</TableCell>
-
-                    <TableCell>{curator.first_name}</TableCell>
                     <TableCell>{curator.last_name}</TableCell>
+                    <TableCell>{curator.first_name}</TableCell>
                     <TableCell>{curator.patronymic}</TableCell>
+                    <TableCell>
+                      {curator.groups && curator.groups.length > 0
+                        ? curator.groups.map((group) => (
+                            <Badge key={group.id} className="mr-1">
+                              {group.name}
+                            </Badge>
+                          ))
+                        : "Нет групп"}
+                    </TableCell>
+
                     <TableCell>{curator.login}</TableCell>
                     <TableCell>{curator.password}</TableCell>
                     <TableCell>

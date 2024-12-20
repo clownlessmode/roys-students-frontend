@@ -32,6 +32,14 @@ class GroupService {
     return response.data;
   }
 
+  static async findGroupsByCurator(id: string, dto: UpdateGroupDto) {
+    const response = await baseApi.patch(`/group/by/${id}`, dto, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+    return response.data;
+  }
+
   static async deleteGroup(id: string) {
     const response = await baseApi.delete(`/group/${id}`, {
       withCredentials: true,

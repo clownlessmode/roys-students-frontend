@@ -52,7 +52,9 @@ export const useStudentController = () => {
         .promise(StudentService.updateStudent(id, data), {
           loading: "Обновление данных студента...",
           success: () => {
-            queryClient.invalidateQueries({ queryKey: ["studentList"] });
+            queryClient.invalidateQueries({
+              queryKey: ["studentList", "studentMe"],
+            });
             return "Данные студента успешно обновлены";
           },
           error: (err) => {
@@ -64,7 +66,7 @@ export const useStudentController = () => {
         })
         .unwrap(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["studentList"] });
+      queryClient.invalidateQueries({ queryKey: ["studentList", "studentMe"] });
     },
   });
 
