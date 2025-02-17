@@ -1,8 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Component, GraduationCap, User2 } from "lucide-react";
-
+import {
+  Component,
+  GraduationCap,
+  User2,
+  BookCheck,
+  BookMarkedIcon,
+} from "lucide-react";
 import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -44,6 +49,16 @@ export function AdminSidebar({
         name: "Группы",
         url: "/admin/groups",
         icon: Component,
+      },
+      {
+        name: "Экзамены",
+        url: "/admin/exams",
+        icon: BookCheck,
+      },
+      {
+        name: "Зачеты",
+        url: "/admin/credits",
+        icon: BookMarkedIcon,
       },
     ],
   };
