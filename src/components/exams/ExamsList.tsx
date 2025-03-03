@@ -17,6 +17,7 @@ import { MoreHorizontal, Search } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
+import { AddNewExam } from "./AddNewExam";
 
 export default function ExamsList() {
   const [isLoading] = useState(false);
@@ -124,7 +125,7 @@ export default function ExamsList() {
             />
             <Search className="absolute right-4 top-1.5 opacity-15" />
           </div>
-          <Button>Добавить экзамен</Button>
+          <AddNewExam />
         </div>
 
         <div className="border rounded-lg">
