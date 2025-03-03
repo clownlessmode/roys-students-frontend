@@ -17,9 +17,10 @@ import { MoreHorizontal, Search } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
+import { AddNewCredit } from "./AddNewCredit";
 
 export default function CreditsList() {
-  const [isLoading] = useState(false);
+  const [isLoading] = useState<boolean>(false);
   const [credits, setCredits] = useState([
     {
       id: 1,
@@ -124,7 +125,7 @@ export default function CreditsList() {
             />
             <Search className="absolute right-4 top-1.5 opacity-15" />
           </div>
-          <Button>Добавить зачет</Button>
+          <AddNewCredit />
         </div>
 
         <div className="border rounded-lg">
