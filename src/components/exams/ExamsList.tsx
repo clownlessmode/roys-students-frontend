@@ -79,6 +79,21 @@ export default function ExamsList({ data, isLoading }: Props) {
     setExams(sortedData);
   };
 
+  const getExamRowStyle = (examDate: string) => {
+    const today = new Date();
+    const examDateTime = new Date(examDate);
+    const diffDays = Math.ceil(
+      (examDateTime.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays <= 3 && diffDays > 0) {
+      return "bg-green-900 hover:bg-green-800";
+    } else if (diffDays < 0) {
+      return "bg-red-900 hover:bg-red-800";
+    }
+    return "";
+  };
+
   return (
     <div className="w-full p-6 bg-background">
       <div className="space-y-4">
@@ -137,7 +152,10 @@ export default function ExamsList({ data, isLoading }: Props) {
                   ))
               ) : filteredCredits.length > 0 ? (
                 filteredCredits.map((exams, index) => (
-                  <TableRow key={exams.id}>
+                  <TableRow
+                    key={exams.id}
+                    className={getExamRowStyle(exams.holding_date)}
+                  >
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>{exams.discipline}</TableCell>
                     <TableCell>
