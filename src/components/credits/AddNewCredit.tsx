@@ -257,7 +257,7 @@ export function AddNewCredit() {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="birthdate">Дата проведения зачета</Label>
+            <Label htmlFor="holding_date">Дата проведения зачета</Label>
             <Controller
               name="holding_date"
               control={control}

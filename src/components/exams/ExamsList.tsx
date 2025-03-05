@@ -18,71 +18,44 @@ import { Skeleton } from "../ui/skeleton";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { AddNewExam } from "./AddNewExam";
+import { Exam } from "../entity/types/exam.interface";
+import { format } from "date-fns";
 
-export default function ExamsList() {
-  const [isLoading] = useState(false);
-  const [credits, setCredits] = useState([
-    {
-      id: 1,
-      discipline: "Математический анализ",
-      date: "2025-02-20",
-      teacher: {
-        last_name: "Иванов",
-        first_name: "Алексей",
-        patronymic: "Петрович",
-      },
-    },
-    {
-      id: 2,
-      discipline: "Физика",
-      date: "2025-02-25",
-      teacher: {
-        last_name: "Петров",
-        first_name: "Дмитрий",
-        patronymic: "Сергеевич",
-      },
-    },
-    {
-      id: 3,
-      discipline: "Программирование",
-      date: "2025-03-01",
-      teacher: {
-        last_name: "Сидоров",
-        first_name: "Николай",
-        patronymic: "Андреевич",
-      },
-    },
-  ]);
+interface Props {
+  data: Exam[];
+  isLoading: boolean;
+}
+
+export default function ExamsList({ data, isLoading }: Props) {
+  const [exams, setExams] = useState<Exam[]>([]);
+
+  useEffect(() => {
+    setExams(data || []);
+  }, [data]);
 
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  useEffect(() => {
-    setCredits(credits || []);
-  }, [credits]);
-
-  const filteredCredits = credits.filter(
-    (credit) =>
-      credit.discipline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      credit.teacher.first_name
+  const filteredCredits = exams.filter(
+    (exam) =>
+      exam.discipline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      exam.curator.first_name
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      credit.teacher.last_name
+      exam.curator.last_name
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      credit.teacher.patronymic
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+      exam.curator.patronymic.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof (typeof credits)[0] | null;
+    key: keyof (typeof exams)[0] | null;
     direction: "asc" | "desc" | string;
   }>({
     key: null,
     direction: "asc",
   });
 
-  const handleSort = (key: keyof (typeof credits)[0]) => {
+  const handleSort = (key: keyof (typeof exams)[0]) => {
     let direction = "asc";
 
     if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -90,7 +63,7 @@ export default function ExamsList() {
     }
     setSortConfig({ key, direction });
 
-    const sortedData = [...credits].sort((a, b) => {
+    const sortedData = [...exams].sort((a, b) => {
       const aValue = a[key] ?? "";
       const bValue = b[key] ?? "";
 
@@ -103,7 +76,7 @@ export default function ExamsList() {
       return 0;
     });
 
-    setCredits(sortedData);
+    setExams(sortedData);
   };
 
   return (
@@ -136,8 +109,10 @@ export default function ExamsList() {
                 <TableHead onClick={() => handleSort("discipline")}>
                   Дисциплина
                 </TableHead>
-                <TableHead onClick={() => handleSort("date")}>Дата</TableHead>
-                <TableHead onClick={() => handleSort("teacher")}>
+                <TableHead onClick={() => handleSort("holding_date")}>
+                  Дата
+                </TableHead>
+                <TableHead onClick={() => handleSort("curator")}>
                   Преподаватель
                 </TableHead>
                 <TableHead className="w-12"></TableHead>
@@ -161,14 +136,16 @@ export default function ExamsList() {
                     </TableRow>
                   ))
               ) : filteredCredits.length > 0 ? (
-                filteredCredits.map((credit, index) => (
-                  <TableRow key={credit.id}>
+                filteredCredits.map((exams, index) => (
+                  <TableRow key={exams.id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{credit.discipline}</TableCell>
-                    <TableCell>{credit.date}</TableCell>
+                    <TableCell>{exams.discipline}</TableCell>
                     <TableCell>
-                      {credit.teacher.last_name} {credit.teacher.first_name}{" "}
-                      {credit.teacher.patronymic}
+                      {format(new Date(exams.holding_date), "yyyy-MM-dd")}
+                    </TableCell>
+                    <TableCell>
+                      {exams.curator.last_name} {exams.curator.first_name}{" "}
+                      {exams.curator.patronymic}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
