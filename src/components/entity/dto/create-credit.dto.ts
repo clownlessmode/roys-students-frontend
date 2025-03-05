@@ -5,4 +5,5 @@ export interface CreateCreditDto {
   course: number;
   discipline: string;
   curator_id: string;
+  holding_date: Date;
 }

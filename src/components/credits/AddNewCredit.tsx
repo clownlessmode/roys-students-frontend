@@ -19,6 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
+import { Calendar } from "@/components/ui/calendar";
+import { isValid as isValidDate } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Label } from "../ui/label";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
@@ -27,6 +37,8 @@ import { useGroupController } from "../entity/controllers/group.controller";
 import { CreateCreditDto } from "../entity/dto/create-credit.dto";
 import { useCourseCalculator } from "@/hooks/use-course-calculator";
 import { useCuratorController } from "../entity/controllers/curator.controller";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export function AddNewCredit() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -58,6 +70,10 @@ export function AddNewCredit() {
   const onSubmit: SubmitHandler<CreateCreditDto> = async (
     data: CreateCreditDto
   ) => {
+    if (data.holding_date && !isValidDate(new Date(data.holding_date))) {
+      toast.error("Дата проведения зачета должна быть корректной");
+      return;
+    }
     console.log(data);
     reset();
     setIsOpen(false);
@@ -237,6 +253,46 @@ export function AddNewCredit() {
                     </SelectContent>
                   </Select>
                 </>
+              )}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="birthdate">Дата проведения зачета</Label>
+            <Controller
+              name="holding_date"
+              control={control}
+              render={({ field }) => (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {field.value ? (
+                        format(new Date(field.value), "PPP", { locale: ru })
+                      ) : (
+                        <span>Выберите дату</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value ? new Date(field.value) : undefined}
+                      onSelect={field.onChange}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
               )}
             />
           </div>
