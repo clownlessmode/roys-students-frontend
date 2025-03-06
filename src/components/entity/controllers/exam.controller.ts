@@ -1,16 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ExamService from "../services/exam.service";
-import { Exam } from "../types/exam.interface";
+import { Exam, ExamEnum } from "../types/exam.interface";
 import { AxiosError } from "axios";
 import { ApiError } from "next/dist/server/api-utils";
 import { CreateExamDto } from "../dto/create-exam.dto";
 import { toast } from "sonner";
 
-export const useExamController = () => {
+export const useExamController = (type?: ExamEnum | undefined) => {
   const queryClient = useQueryClient();
   const getExams = useQuery({
-    queryKey: ["examList"],
-    queryFn: ExamService.getExams,
+    queryKey: type ? ["examList", type] : ["examList"],
+    queryFn: () => ExamService.getExams(type),
   });
 
   const createExam = useMutation<Exam, AxiosError<ApiError>, CreateExamDto>({

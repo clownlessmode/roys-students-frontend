@@ -1,4 +1,7 @@
+import { ExamEnum } from "../types/exam.interface";
+
 export interface CreateExamDto {
+  type: ExamEnum;
   group_id: string;
   semester: number;
   course: number;

@@ -34,7 +34,6 @@ import { Label } from "../ui/label";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Skeleton } from "../ui/skeleton";
 import { useGroupController } from "../entity/controllers/group.controller";
-import { CreateCreditDto } from "../entity/dto/create-credit.dto";
 import { useCourseCalculator } from "@/hooks/use-course-calculator";
 import { useCuratorController } from "../entity/controllers/curator.controller";
 import { toast } from "sonner";
@@ -42,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { useExamController } from "../entity/controllers/exam.controller";
 import { CreateExamDto } from "../entity/dto/create-exam.dto";
 import Spinner from "../ui/Spinner";
+import { ExamEnum } from "../entity/types/exam.interface";
 
 export function AddNewExam() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -57,7 +57,7 @@ export function AddNewExam() {
     reset,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<CreateCreditDto>({
+  } = useForm<CreateExamDto>({
     mode: "onChange",
   });
 
@@ -78,7 +78,7 @@ export function AddNewExam() {
       toast.error("Дата проведения экзамена должна быть корректной");
       return;
     }
-    await createExam(data);
+    await createExam({ ...data, type: ExamEnum.Exam });
     reset();
     setIsOpen(false);
   };

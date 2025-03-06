@@ -1,9 +1,15 @@
 import { baseApi } from "@/components/providers/base-api";
 import { CreateExamDto } from "../dto/create-exam.dto";
+import { ExamEnum } from "../types/exam.interface";
 
 class ExamService {
-  static async getExams() {
-    const response = await baseApi.get("/exams", { withCredentials: true });
+  static async getExams(type?: ExamEnum | undefined) {
+    const response = await baseApi.get(
+      type ? `/exams?type=${type}` : "/exams",
+      {
+        withCredentials: true,
+      }
+    );
     return response.data;
   }
 
