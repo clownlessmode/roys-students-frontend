@@ -21,6 +21,7 @@ import { AddNewExam } from "./AddNewExam";
 import { Exam } from "../entity/types/exam.interface";
 import { format } from "date-fns";
 import { AddMark } from "./AddMark";
+import Link from "next/link";
 
 interface Props {
   data: Exam[];
@@ -179,6 +180,11 @@ export default function ExamsList({ data, isLoading }: Props) {
                               groupId={exams.group.id}
                               examId={exams.id}
                             />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/exams/${exams.id}`}>
+                              <Button variant="link">Просмотр оценок</Button>
+                            </Link>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

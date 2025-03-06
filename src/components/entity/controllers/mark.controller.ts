@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Mark } from "../types/mark.interface";
 import { AxiosError } from "axios";
 import { ApiError } from "next/dist/server/api-utils";
@@ -8,6 +8,14 @@ import MarkService from "../services/mark.service";
 
 export const useMarkController = () => {
   const queryClient = useQueryClient();
+
+  const useGetMarksByExamId = (examId: string) => {
+    return useQuery({
+      queryKey: ["markList", examId],
+      queryFn: () => MarkService.getMarkByExamId(examId),
+      enabled: !!examId,
+    });
+  };
 
   const createMark = useMutation<Mark, AxiosError<ApiError>, CreateMarkDto>({
     mutationFn: (data) =>
@@ -31,5 +39,6 @@ export const useMarkController = () => {
   return {
     createMark: createMark.mutateAsync,
     isCreatingMark: createMark.isPending,
+    useGetMarksByExamId,
   };
 };
