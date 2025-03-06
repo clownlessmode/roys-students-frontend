@@ -20,6 +20,7 @@ import { Input } from "../ui/input";
 import { AddNewExam } from "./AddNewExam";
 import { Exam } from "../entity/types/exam.interface";
 import { format } from "date-fns";
+import { AddMark } from "./AddMark";
 
 interface Props {
   data: Exam[];
@@ -173,7 +174,12 @@ export default function ExamsList({ data, isLoading }: Props) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Выставить оценки</DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <AddMark
+                              groupId={exams.group.id}
+                              examId={exams.id}
+                            />
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

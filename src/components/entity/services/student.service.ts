@@ -16,6 +16,10 @@ class StudentService {
     return response.data;
   }
 
+  static async getStudentsByGroupId(id: string) {
+    return await baseApi.get(`/student/group/${id}`);
+  }
+
   static async getStudentsByCurator() {
     const response = await baseApi.get("/student/bycurator/curator", {
       withCredentials: true,

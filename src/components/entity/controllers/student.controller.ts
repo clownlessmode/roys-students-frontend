@@ -14,6 +14,12 @@ export const useStudentController = () => {
     queryFn: StudentService.getStudents,
   });
 
+  const useStudentsByGroupId = (groupId: string) =>
+    useQuery({
+      queryKey: ["studentListByGroupId", groupId],
+      queryFn: () => StudentService.getStudentsByGroupId(groupId),
+    });
+
   const getStudentsByCurator = useQuery({
     queryKey: ["studentCuratorList"],
     queryFn: StudentService.getStudentsByCurator,
@@ -104,5 +110,6 @@ export const useStudentController = () => {
     isCreatingStudent: createStudent.isPending,
     isUpdatingStudent: updateStudent.isPending,
     isDeletingStudent: deleteStudent.isPending,
+    useStudentsByGroupId,
   };
 };
