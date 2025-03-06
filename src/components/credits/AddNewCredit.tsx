@@ -34,11 +34,14 @@ import { Label } from "../ui/label";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Skeleton } from "../ui/skeleton";
 import { useGroupController } from "../entity/controllers/group.controller";
-import { CreateCreditDto } from "../entity/dto/create-credit.dto";
 import { useCourseCalculator } from "@/hooks/use-course-calculator";
 import { useCuratorController } from "../entity/controllers/curator.controller";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useExamController } from "../entity/controllers/exam.controller";
+import { CreateExamDto } from "../entity/dto/create-exam.dto";
+import Spinner from "../ui/Spinner";
+import { ExamEnum } from "../entity/types/exam.interface";
 
 export function AddNewCredit() {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -53,8 +56,8 @@ export function AddNewCredit() {
     register,
     reset,
     handleSubmit,
-    formState: { errors },
-  } = useForm<CreateCreditDto>({
+    formState: { errors, isValid },
+  } = useForm<CreateExamDto>({
     mode: "onChange",
   });
 
@@ -62,19 +65,20 @@ export function AddNewCredit() {
     groups?.find((group) => group.id === watch("group_id"))?.name || "";
 
   const course = useCourseCalculator(selectedGroupName);
+  const { createExam, isCreatingExam } = useExamController();
 
   React.useEffect(() => {
     if (course) setValue("course", course);
   }, [course, setValue]);
 
-  const onSubmit: SubmitHandler<CreateCreditDto> = async (
-    data: CreateCreditDto
+  const onSubmit: SubmitHandler<CreateExamDto> = async (
+    data: CreateExamDto
   ) => {
     if (data.holding_date && !isValidDate(new Date(data.holding_date))) {
       toast.error("Дата проведения зачета должна быть корректной");
       return;
     }
-    console.log(data);
+    await createExam({ ...data, type: ExamEnum.Credit });
     reset();
     setIsOpen(false);
   };
@@ -296,8 +300,12 @@ export function AddNewCredit() {
               )}
             />
           </div>
-          <Button type="submit" className="w-full">
-            Сохранить
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={!isValid || isCreatingExam}
+          >
+            {isCreatingExam ? <Spinner /> : "Создать зачет"}
           </Button>
         </form>
       </DialogContent>

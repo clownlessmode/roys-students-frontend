@@ -17,72 +17,47 @@ import { MoreHorizontal, Search } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
+import { Exam } from "../entity/types/exam.interface";
+import { format } from "date-fns";
+import { AddMark } from "../exams/AddMark";
+import Link from "next/link";
 import { AddNewCredit } from "./AddNewCredit";
 
-export default function CreditsList() {
-  const [isLoading] = useState<boolean>(false);
-  const [credits, setCredits] = useState([
-    {
-      id: 1,
-      discipline: "Математический анализ",
-      date: "2025-02-20",
-      teacher: {
-        last_name: "Иванов",
-        first_name: "Алексей",
-        patronymic: "Петрович",
-      },
-    },
-    {
-      id: 2,
-      discipline: "Физика",
-      date: "2025-02-25",
-      teacher: {
-        last_name: "Петров",
-        first_name: "Дмитрий",
-        patronymic: "Сергеевич",
-      },
-    },
-    {
-      id: 3,
-      discipline: "Программирование",
-      date: "2025-03-01",
-      teacher: {
-        last_name: "Сидоров",
-        first_name: "Николай",
-        patronymic: "Андреевич",
-      },
-    },
-  ]);
+interface Props {
+  data: Exam[];
+  isLoading: boolean;
+}
+
+export default function CreditsList({ data, isLoading }: Props) {
+  const [exams, setExams] = useState<Exam[]>([]);
+
+  useEffect(() => {
+    setExams(data || []);
+  }, [data]);
 
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  useEffect(() => {
-    setCredits(credits || []);
-  }, [credits]);
-
-  const filteredCredits = credits.filter(
-    (credit) =>
-      credit.discipline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      credit.teacher.first_name
+  const filteredCredits = exams.filter(
+    (exam) =>
+      exam.discipline.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      exam.curator.first_name
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      credit.teacher.last_name
+      exam.curator.last_name
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      credit.teacher.patronymic
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+      exam.curator.patronymic.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof (typeof credits)[0] | null;
+    key: keyof (typeof exams)[0] | null;
     direction: "asc" | "desc" | string;
   }>({
     key: null,
     direction: "asc",
   });
 
-  const handleSort = (key: keyof (typeof credits)[0]) => {
+  const handleSort = (key: keyof (typeof exams)[0]) => {
     let direction = "asc";
 
     if (sortConfig.key === key && sortConfig.direction === "asc") {
@@ -90,7 +65,7 @@ export default function CreditsList() {
     }
     setSortConfig({ key, direction });
 
-    const sortedData = [...credits].sort((a, b) => {
+    const sortedData = [...exams].sort((a, b) => {
       const aValue = a[key] ?? "";
       const bValue = b[key] ?? "";
 
@@ -103,7 +78,22 @@ export default function CreditsList() {
       return 0;
     });
 
-    setCredits(sortedData);
+    setExams(sortedData);
+  };
+
+  const getExamRowStyle = (examDate: string) => {
+    const today = new Date();
+    const examDateTime = new Date(examDate);
+    const diffDays = Math.ceil(
+      (examDateTime.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    if (diffDays <= 3 && diffDays > 0) {
+      return "bg-green-900 hover:bg-green-800";
+    } else if (diffDays < 0) {
+      return "bg-red-900 hover:bg-red-800";
+    }
+    return "";
   };
 
   return (
@@ -136,8 +126,10 @@ export default function CreditsList() {
                 <TableHead onClick={() => handleSort("discipline")}>
                   Дисциплина
                 </TableHead>
-                <TableHead onClick={() => handleSort("date")}>Дата</TableHead>
-                <TableHead onClick={() => handleSort("teacher")}>
+                <TableHead onClick={() => handleSort("holding_date")}>
+                  Дата
+                </TableHead>
+                <TableHead onClick={() => handleSort("curator")}>
                   Преподаватель
                 </TableHead>
                 <TableHead className="w-12"></TableHead>
@@ -161,14 +153,19 @@ export default function CreditsList() {
                     </TableRow>
                   ))
               ) : filteredCredits.length > 0 ? (
-                filteredCredits.map((credit, index) => (
-                  <TableRow key={credit.id}>
+                filteredCredits.map((exams, index) => (
+                  <TableRow
+                    key={exams.id}
+                    className={getExamRowStyle(exams.holding_date)}
+                  >
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{credit.discipline}</TableCell>
-                    <TableCell>{credit.date}</TableCell>
+                    <TableCell>{exams.discipline}</TableCell>
                     <TableCell>
-                      {credit.teacher.last_name} {credit.teacher.first_name}{" "}
-                      {credit.teacher.patronymic}
+                      {format(new Date(exams.holding_date), "yyyy-MM-dd")}
+                    </TableCell>
+                    <TableCell>
+                      {exams.curator.last_name} {exams.curator.first_name}{" "}
+                      {exams.curator.patronymic}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -178,7 +175,17 @@ export default function CreditsList() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>Выставить оценки</DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <AddMark
+                              groupId={exams.group.id}
+                              examId={exams.id}
+                            />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/exams/${exams.id}`}>
+                              <Button variant="link">Просмотр оценок</Button>
+                            </Link>
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

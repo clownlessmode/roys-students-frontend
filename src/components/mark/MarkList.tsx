@@ -52,9 +52,9 @@ export default function MarkList({ data, isLoading }: Props) {
   const filteredMarks = sortedMarks.filter((mark) => {
     const searchLower = searchQuery.toLowerCase();
     return (
-      mark.exam.discipline.toLowerCase().includes(searchLower) ||
-      `${mark.student.last_name} ${mark.student.first_name} ${
-        mark.student.patronymic || ""
+      (mark.exam?.discipline?.toLowerCase() || "").includes(searchLower) ||
+      `${mark.student?.last_name || ""} ${mark.student?.first_name || ""} ${
+        mark.student?.patronymic || ""
       }`
         .toLowerCase()
         .includes(searchLower)
@@ -69,16 +69,31 @@ export default function MarkList({ data, isLoading }: Props) {
     setSortConfig({ key, direction });
   };
 
+  const getDisciplineName = () => {
+    if (!data || data.length === 0) return "Неизвестная дисциплина";
+    return data[0]?.exam?.discipline || "Неизвестная дисциплина";
+  };
+
+  const getComponentType = (): string => {
+    if (!data || data.length === 0) return "экзамен";
+    const examType = data[0]?.exam?.type;
+    return examType === "Credit" ? "зачёт" : "экзамен";
+  };
+
   return (
     <div className="w-full p-6 bg-background">
       <div className="space-y-4">
         <div className="flex flex-row items-end justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Оценки за экзамен</h1>
-            <p className="text-muted-foreground">
-              Просмотр оценок за экзамен по дисциплине{" "}
-              {data && data[0].exam.discipline}.
-            </p>
+            <h1 className="text-2xl font-bold">
+              Оценки за {getComponentType()}
+            </h1>
+            {data && data.length > 0 && (
+              <p className="text-muted-foreground">
+                Просмотр оценок за {getComponentType()} по дисциплине{" "}
+                {getDisciplineName()}.
+              </p>
+            )}
           </div>
           <div className="relative flex items-center">
             <Input
@@ -129,15 +144,22 @@ export default function MarkList({ data, isLoading }: Props) {
                 filteredMarks.map((mark, index) => (
                   <TableRow key={mark.id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{mark.exam.discipline}</TableCell>
+                    <TableCell>{mark.exam?.discipline || "—"}</TableCell>
                     <TableCell>
-                      {format(new Date(mark.exam.holding_date), "dd.MM.yyyy")}
+                      {mark.exam?.holding_date
+                        ? format(new Date(mark.exam.holding_date), "dd.MM.yyyy")
+                        : "—"}
                     </TableCell>
                     <TableCell>
-                      {mark.student.last_name} {mark.student.first_name}{" "}
-                      {mark.student.patronymic}
+                      {[
+                        mark.student?.last_name,
+                        mark.student?.first_name,
+                        mark.student?.patronymic,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || "—"}
                     </TableCell>
-                    <TableCell>{mark.mark}</TableCell>
+                    <TableCell>{mark.mark ?? "—"}</TableCell>
                   </TableRow>
                 ))
               ) : (
@@ -146,7 +168,7 @@ export default function MarkList({ data, isLoading }: Props) {
                     colSpan={5}
                     className="text-center font-semibold py-4"
                   >
-                    Данные не найдены
+                    Оценки не выставлены
                   </TableCell>
                 </TableRow>
               )}
