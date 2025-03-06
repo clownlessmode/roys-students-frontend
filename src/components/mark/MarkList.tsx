@@ -25,10 +25,16 @@ export default function MarkList({ data, isLoading }: Props) {
     direction: "asc" | "desc";
   }>({ key: null, direction: "asc" });
 
-  const getNestedValue = (obj: any, path: string) => {
-    return path.split(".").reduce((acc, part) => {
+  const getNestedValue = (
+    obj: Mark | null | undefined,
+    path: string
+  ): unknown => {
+    return path.split(".").reduce<unknown>((acc, part) => {
       if (acc === null || acc === undefined) return undefined;
-      return acc[part];
+      if (typeof acc === "object" && acc !== null && part in acc) {
+        return (acc as Record<string, unknown>)[part];
+      }
+      return undefined;
     }, obj);
   };
 
