@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -15,13 +17,23 @@ import {
 import { Button } from "../ui/button";
 import { MoreHorizontal, Search } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "../ui/input";
 import { AddNewExam } from "./AddNewExam";
 import { Exam } from "../entity/types/exam.interface";
-import { format } from "date-fns";
+import { format, parseISO, isAfter, isBefore } from "date-fns";
 import { AddMark } from "./AddMark";
 import Link from "next/link";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { AddLinkExam } from "./AddLinkExam";
+import { Badge } from "../ui/badge";
+import DeleteExam from "./DeleteExam";
 
 interface Props {
   data: Exam[];
@@ -30,15 +42,26 @@ interface Props {
 
 export default function ExamsList({ data, isLoading }: Props) {
   const [exams, setExams] = useState<Exam[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedGroup, setSelectedGroup] = useState<string>("Все");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
 
   useEffect(() => {
     setExams(data || []);
   }, [data]);
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  // Получаем список уникальных групп
+  const groups = useMemo(() => {
+    const uniqueGroups = Array.from(
+      new Set((data || []).map((exam) => exam.group.name))
+    );
+    return ["Все", ...uniqueGroups];
+  }, [data]);
 
-  const filteredCredits = exams.filter(
-    (exam) =>
+  // Фильтрация по поиску, группе и датам
+  const filteredCredits = exams.filter((exam) => {
+    const matchesSearch =
       exam.discipline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       exam.curator.first_name
         .toLowerCase()
@@ -46,8 +69,25 @@ export default function ExamsList({ data, isLoading }: Props) {
       exam.curator.last_name
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      exam.curator.patronymic.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      exam.curator.patronymic.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesGroup =
+      selectedGroup === "Все" || exam.group.name === selectedGroup;
+
+    const examDate = parseISO(exam.holding_date);
+
+    const matchesStartDate = startDate
+      ? isAfter(examDate, parseISO(startDate)) ||
+        examDate.toDateString() === parseISO(startDate).toDateString()
+      : true;
+
+    const matchesEndDate = endDate
+      ? isBefore(examDate, parseISO(endDate)) ||
+        examDate.toDateString() === parseISO(endDate).toDateString()
+      : true;
+
+    return matchesSearch && matchesGroup && matchesStartDate && matchesEndDate;
+  });
 
   const [sortConfig, setSortConfig] = useState<{
     key: keyof (typeof exams)[0] | null;
@@ -99,25 +139,72 @@ export default function ExamsList({ data, isLoading }: Props) {
   return (
     <div className="w-full p-6 bg-background">
       <div className="space-y-4">
-        <div className="flex flex-row items-end justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-bold">Экзамены</h1>
             <p className="text-muted-foreground">
               Управляйте экзаменами в системе.
             </p>
           </div>
-          <div className="relative flex items-center">
-            <Input
-              className="w-[500px]"
-              placeholder="Поиск..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <Search className="absolute right-4 top-1.5 opacity-15" />
+
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Левая часть: Поиск + Группа + Даты */}
+            <div className="flex flex-wrap gap-2 items-center">
+              {/* Поиск */}
+              <div className="relative">
+                <Input
+                  className="w-[200px] md:w-[250px]"
+                  placeholder="Поиск..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <Search className="absolute right-2 top-2 h-4 w-4 text-muted-foreground" />
+              </div>
+
+              {/* Группа */}
+              <Select
+                value={selectedGroup}
+                onValueChange={(value) => setSelectedGroup(value)}
+              >
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Группа" />
+                </SelectTrigger>
+                <SelectContent>
+                  {groups.map((group) => (
+                    <SelectItem key={group} value={group}>
+                      {group}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Дата от */}
+              <Input
+                type="date"
+                className="h-9 w-[140px]"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                placeholder="Дата от"
+              />
+
+              {/* Дата до */}
+              <Input
+                type="date"
+                className="h-9 w-[140px]"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                placeholder="Дата до"
+              />
+            </div>
+
+            {/* Правая часть: кнопка Добавить экзамен */}
+            <div>
+              <AddNewExam />
+            </div>
           </div>
-          <AddNewExam />
         </div>
 
+        {/* Таблица */}
         <div className="border rounded-lg">
           <Table className="rounded-lg overflow-hidden">
             <TableHeader>
@@ -131,6 +218,12 @@ export default function ExamsList({ data, isLoading }: Props) {
                 </TableHead>
                 <TableHead onClick={() => handleSort("curator")}>
                   Преподаватель
+                </TableHead>
+                <TableHead onClick={() => handleSort("group")}>
+                  Группа
+                </TableHead>
+                <TableHead onClick={() => handleSort("link")}>
+                  Ссылка на билеты
                 </TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
@@ -153,19 +246,29 @@ export default function ExamsList({ data, isLoading }: Props) {
                     </TableRow>
                   ))
               ) : filteredCredits.length > 0 ? (
-                filteredCredits.map((exams, index) => (
+                filteredCredits.map((exam, index) => (
                   <TableRow
-                    key={exams.id}
-                    className={getExamRowStyle(exams.holding_date)}
+                    key={exam.id}
+                    className={getExamRowStyle(exam.holding_date)}
                   >
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{exams.discipline}</TableCell>
+                    <TableCell>{exam.discipline}</TableCell>
                     <TableCell>
-                      {format(new Date(exams.holding_date), "yyyy-MM-dd")}
+                      {format(new Date(exam.holding_date), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell>
-                      {exams.curator.last_name} {exams.curator.first_name}{" "}
-                      {exams.curator.patronymic}
+                      {exam.curator.last_name} {exam.curator.first_name}{" "}
+                      {exam.curator.patronymic}
+                    </TableCell>
+                    <TableCell>{exam.group.name}</TableCell>
+                    <TableCell>
+                      {exam.link === null ? (
+                        <Badge>Билеты не прикреплены</Badge>
+                      ) : (
+                        <Link href={exam.link} target="_blank">
+                          <Badge>Ссылка на билеты</Badge>
+                        </Link>
+                      )}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -176,15 +279,23 @@ export default function ExamsList({ data, isLoading }: Props) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <AddMark
-                              groupId={exams.group.id}
-                              examId={exams.id}
-                            />
+                            <AddMark groupId={exam.group.id} examId={exam.id} />
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href={`/admin/exams/${exams.id}`}>
-                              <Button variant="link">Просмотр оценок</Button>
+                            <AddLinkExam examId={exam.id} />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/exams/${exam.id}`}>
+                              <Button
+                                variant="ghost"
+                                className="text-center rounded-full w-full"
+                              >
+                                Просмотр оценок
+                              </Button>
                             </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <DeleteExam id={exam.id} />
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -194,10 +305,10 @@ export default function ExamsList({ data, isLoading }: Props) {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={6}
                     className="text-center font-semibold py-4"
                   >
-                    Данные не найдены
+                    Экзамены не найдены
                   </TableCell>
                 </TableRow>
               )}

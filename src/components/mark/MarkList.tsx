@@ -12,6 +12,8 @@ import { useState } from "react";
 import { Input } from "../ui/input";
 import { format } from "date-fns";
 import { Mark } from "../entity/types/mark.interface";
+import * as XLSX from "xlsx";
+import { Button } from "../ui/button";
 
 interface Props {
   data: Mark[];
@@ -85,7 +87,50 @@ export default function MarkList({ data, isLoading }: Props) {
     const examType = data[0]?.exam?.type;
     return examType === "Credit" ? "зачёт" : "экзамен";
   };
+  const handleExportToExcel = () => {
+    const exportData = filteredMarks.map((mark, index) => ({
+      "#": index + 1,
+      Дисциплина: mark.exam?.discipline || "",
+      "Дата экзамена": mark.exam?.holding_date
+        ? format(new Date(mark.exam.holding_date), "dd.MM.yyyy")
+        : "",
+      Студент: `${mark.student?.last_name || ""} ${
+        mark.student?.first_name || ""
+      } ${mark.student?.patronymic || ""}`,
+      Оценка: mark.mark ?? "",
+    }));
 
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+    // Стили для заголовков
+    const headerStyle = {
+      font: { bold: true, color: { rgb: "FFFFFF" } },
+      fill: { fgColor: { rgb: "1E40AF" } }, // Indigo-900
+      alignment: { horizontal: "center" },
+    };
+
+    // Применение стилей к заголовкам
+    const range = XLSX.utils.decode_range(worksheet["!ref"]!);
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cell_address = XLSX.utils.encode_cell({ r: 0, c: C });
+      if (!worksheet[cell_address]) continue;
+      worksheet[cell_address].s = headerStyle;
+    }
+
+    // Ширина колонок
+    worksheet["!cols"] = [
+      { wch: 5 },
+      { wch: 25 },
+      { wch: 20 },
+      { wch: 35 },
+      { wch: 10 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Оценки");
+
+    XLSX.writeFile(workbook, `Оценки_${getDisciplineName()}.xlsx`);
+  };
   return (
     <div className="w-full p-6 bg-background">
       <div className="space-y-4">
@@ -109,6 +154,9 @@ export default function MarkList({ data, isLoading }: Props) {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <Search className="absolute right-4 top-1.5 opacity-15" />
+            <Button variant="outline" onClick={handleExportToExcel}>
+              Экспорт в Excel
+            </Button>
           </div>
         </div>
 

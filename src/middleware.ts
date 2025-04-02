@@ -6,7 +6,7 @@ export function middleware(req: NextRequest) {
   const requestedPath = req.nextUrl.pathname;
 
   // Исключаем маршруты, которые не требуют проверки
-  const publicRoutes = ["/login", "/api/auth"]; // Добавьте другие маршруты, если нужно
+  const publicRoutes = ["/login", "/api/auth", "/"]; // Добавьте другие маршруты, если нужно
   if (publicRoutes.some((route) => requestedPath.startsWith(route))) {
     return NextResponse.next();
   }
@@ -20,7 +20,7 @@ export function middleware(req: NextRequest) {
 
   // Если роль отсутствует, отправляем на /login
   if (!role) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   // Проверяем доступ к маршруту для роли

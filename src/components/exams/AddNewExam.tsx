@@ -29,7 +29,7 @@ import { format } from "date-fns";
 import { ru } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
 import { isValid as isValidDate } from "date-fns";
-import { Input } from "@/components/ui/input";
+
 import { Label } from "../ui/label";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { Skeleton } from "../ui/skeleton";
@@ -42,7 +42,47 @@ import { useExamController } from "../entity/controllers/exam.controller";
 import { CreateExamDto } from "../entity/dto/create-exam.dto";
 import Spinner from "../ui/Spinner";
 import { ExamEnum } from "../entity/types/exam.interface";
-
+const disciplines = [
+  "ОУД.01 Русский язык",
+  "ОУД.01 Литература",
+  "ОУД.02 Иностранный язык",
+  "ОУД.03 Математика",
+  "ОУД.04 История",
+  "ОУД.05 Физическая культура",
+  "ОУД.06 Основы безопасности жизнедеятельности",
+  "ОУД.18 Астрономия",
+  "ОГСЭ.01 Основы философии",
+  "ОГСЭ.02 История",
+  "ОГСЭ.03 Иностранный язык в профессиональной деятельности",
+  "ОГСЭ.04 Физическая культура",
+  "ОГСЭ.05 Психология общения",
+  "ПМ.01 Разработка модулей программного обеспечения для компьютерных систем",
+  "МДК.01.01 Разработка программных модулей",
+  "МДК.01.02 Поддержка и тестировнаие программных модулей",
+  "МДК.01.03 Разработка мобильных приложений",
+  "МДК.01.04 Системное программирование",
+  "УП.01 Учебная практика",
+  "ПП.01 Производственная практика",
+  "ПМ.02 Осуществление интеграции программных модулей",
+  "МДК.02.01 Технология разработки программного обеспечения",
+  "МДК.02.02 Инструментальные средства разработки программного обеспечения",
+  "МДК.02.03 Математическое моделирование",
+  "УП.02 Учебная практика",
+  "ПП.02 Производственная практика",
+  "ПМ.04 Сопровождение и обслуживание программного обеспечения компьютерных систем",
+  "МДК.04.01 Внедрение и поддержка компьютерных систем",
+  "МДК.04.02 Обеспечение качества функционирования компьютерных систем",
+  "УП.04 Учебная практика",
+  "ПП.04.02 Производственная практика",
+  "ПМ 11 Разработка, администрирование и защита баз данных",
+  "МДК.11.01 Технология разработки и защиты баз данных",
+  "УП .11 Учебная практика",
+  "ПП.11 Производственная практика",
+  "ПМ 12 Разработчик Python",
+  "МДК.12.01 Python для автоматизации ИТ-инфраструктуры",
+  "УП .12 Учебная практика",
+  "ПП.12 Производственная практика",
+];
 export function AddNewExam() {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -53,7 +93,7 @@ export function AddNewExam() {
     control,
     setValue,
     watch,
-    register,
+
     reset,
     handleSubmit,
     formState: { errors, isValid },
@@ -158,7 +198,7 @@ export function AddNewExam() {
                     <SelectContent>
                       <SelectGroup>
                         <SelectLabel>Семестр</SelectLabel>
-                        {[1, 2, 3, 4].map((num) => (
+                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                           <SelectItem key={num} value={String(num)}>
                             {num}
                           </SelectItem>
@@ -200,13 +240,31 @@ export function AddNewExam() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="discipline">Дисциплина</Label>
-            <Input
-              id="discipline"
-              type="text"
-              placeholder="Введите название дисциплины"
-              {...register("discipline", {
-                required: "Введите название дисциплины",
-              })}
+            <Controller
+              name="discipline"
+              control={control}
+              rules={{ required: "Введите название дисциплины" }}
+              render={({ field }) => (
+                <div>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full max-w-[375px] truncate">
+                      <SelectValue placeholder="Выберите дисциплину" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {disciplines.map((discipline, idx) => (
+                        <SelectItem key={idx} value={discipline}>
+                          {discipline}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.discipline && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.discipline.message}
+                    </p>
+                  )}
+                </div>
+              )}
             />
             {errors.discipline && (
               <p className="text-red-500 text-sm">
@@ -288,11 +346,6 @@ export function AddNewExam() {
                       mode="single"
                       selected={field.value ? new Date(field.value) : undefined}
                       onSelect={field.onChange}
-                      disabled={(date) => {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        return date < today;
-                      }}
                       initialFocus
                     />
                   </PopoverContent>

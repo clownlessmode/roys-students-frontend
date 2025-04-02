@@ -114,54 +114,30 @@ export default function StudentsList({ data, isLoading }: Props) {
                 <TableHead onClick={() => handleSort("group")}>
                   Группа
                 </TableHead>
-                <TableHead>Cтатус</TableHead>
+                <TableHead>Статус</TableHead>
                 <TableHead onClick={() => handleSort("last_name")}>
-                  Фамилия
-                </TableHead>
-                <TableHead onClick={() => handleSort("first_name")}>
-                  Имя
-                </TableHead>
-                <TableHead onClick={() => handleSort("patronymic")}>
-                  Отчество
+                  ФИО
                 </TableHead>
                 <TableHead onClick={() => handleSort("snils")}>СНИЛС</TableHead>
-                <TableHead onClick={() => handleSort("passport")}>
-                  Пасспорт (cерия)
-                </TableHead>
-                <TableHead onClick={() => handleSort("passport")}>
-                  Пасспорт (номер)
-                </TableHead>
-                <TableHead onClick={() => handleSort("gender")}>Пол</TableHead>
                 <TableHead onClick={() => handleSort("birthdate")}>
                   Дата рождения
-                </TableHead>
-
-                <TableHead onClick={() => handleSort("login")}>Логин</TableHead>
-                <TableHead onClick={() => handleSort("password")}>
-                  Пароль
                 </TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                Array(13)
+                Array(10)
                   .fill(0)
                   .map((_, index) => (
                     <TableRow key={index}>
-                      {Array(12)
+                      {Array(9)
                         .fill(0)
-                        .map((_, index) => {
-                          return (
-                            <TableCell key={index}>
-                              <Skeleton
-                                className={`${
-                                  index !== 13 ? "h-[18px]" : "h-[32px]"
-                                }`}
-                              />
-                            </TableCell>
-                          );
-                        })}
+                        .map((_, index) => (
+                          <TableCell key={index}>
+                            <Skeleton className="h-[18px]" />
+                          </TableCell>
+                        ))}
                     </TableRow>
                   ))
               ) : filteredStudents && filteredStudents.length > 0 ? (
@@ -175,27 +151,14 @@ export default function StudentsList({ data, isLoading }: Props) {
                       >
                         {student.password
                           ? "Зарегистрирован"
-                          : "Нет зарегистрирован"}
+                          : "Не зарегистрирован"}
                       </Badge>
                     </TableCell>
-                    <TableCell>{student.last_name}</TableCell>
-                    <TableCell>{student.first_name}</TableCell>
-                    <TableCell>{student.patronymic}</TableCell>
+                    <TableCell>
+                      {`${student.last_name} ${student.first_name} ${student.patronymic}`}
+                    </TableCell>
                     <TableCell>
                       {student.snils ? student.snils : "Нет данных"}
-                    </TableCell>
-                    <TableCell>
-                      {student.passport
-                        ? student.passport.slice(0, 4)
-                        : "Нет данных"}
-                    </TableCell>
-                    <TableCell>
-                      {student.passport
-                        ? student.passport.slice(5)
-                        : "Нет данных"}
-                    </TableCell>
-                    <TableCell>
-                      {student.gender ? student.gender : "Нет данных"}
                     </TableCell>
                     <TableCell>
                       {student.birthdate
@@ -203,10 +166,6 @@ export default function StudentsList({ data, isLoading }: Props) {
                             locale: ru,
                           })}`
                         : "Нет данных"}
-                    </TableCell>
-                    <TableCell>{student.login}</TableCell>
-                    <TableCell>
-                      {student.password ? student.password : "Нет пароля"}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -230,7 +189,7 @@ export default function StudentsList({ data, isLoading }: Props) {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={10}
                     className="text-center font-semibold py-4"
                   >
                     Данные не найдены

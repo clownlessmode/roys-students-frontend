@@ -15,4 +15,5 @@ export interface Exam {
   holding_date: string;
   group: Group;
   curator: Curator;
+  link: string | null;
 }

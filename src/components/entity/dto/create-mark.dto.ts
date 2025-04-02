@@ -1,5 +1,5 @@
 export interface CreateMarkDto {
-  mark: number;
+  mark: string;
   examId: string;
   studentId: string;
 }

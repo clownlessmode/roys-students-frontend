@@ -13,15 +13,25 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { MoreHorizontal, Search } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "../ui/input";
 import { Exam } from "../entity/types/exam.interface";
 import { format } from "date-fns";
 import { AddMark } from "../exams/AddMark";
 import Link from "next/link";
 import { AddNewCredit } from "./AddNewCredit";
+import DeleteExam from "../exams/DeleteExam";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { AddLinkExam } from "../exams/AddLinkExam";
+import { Badge } from "../ui/badge";
 
 interface Props {
   data: Exam[];
@@ -30,15 +40,29 @@ interface Props {
 
 export default function CreditsList({ data, isLoading }: Props) {
   const [exams, setExams] = useState<Exam[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedGroup, setSelectedGroup] = useState<string>("Все");
+  const [dateRange, setDateRange] = useState<{ from: string; to: string }>({
+    from: "",
+    to: "",
+  });
 
   useEffect(() => {
     setExams(data || []);
   }, [data]);
 
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const groups = useMemo(() => {
+    const uniqueGroups = Array.from(
+      new Set((data || []).map((exam) => exam.group.name))
+    );
+    return ["Все", ...uniqueGroups];
+  }, [data]);
 
-  const filteredCredits = exams.filter(
-    (exam) =>
+  const filteredCredits = exams.filter((exam) => {
+    const matchesGroup =
+      selectedGroup === "Все" || exam.group.name === selectedGroup;
+
+    const matchesSearch =
       exam.discipline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       exam.curator.first_name
         .toLowerCase()
@@ -46,55 +70,23 @@ export default function CreditsList({ data, isLoading }: Props) {
       exam.curator.last_name
         .toLowerCase()
         .includes(searchQuery.toLowerCase()) ||
-      exam.curator.patronymic.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      exam.curator.patronymic.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const [sortConfig, setSortConfig] = useState<{
-    key: keyof (typeof exams)[0] | null;
-    direction: "asc" | "desc" | string;
-  }>({
-    key: null,
-    direction: "asc",
+    const examDate = new Date(exam.holding_date);
+    const fromDate = dateRange.from ? new Date(dateRange.from) : null;
+    const toDate = dateRange.to ? new Date(dateRange.to) : null;
+
+    // Убираем время, сравниваем только даты
+    const normalizeDate = (date: Date) =>
+      new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const isAfterFromDate =
+      !fromDate || normalizeDate(examDate) >= normalizeDate(fromDate);
+    const isBeforeToDate =
+      !toDate || normalizeDate(examDate) <= normalizeDate(toDate);
+
+    return matchesSearch && matchesGroup && isAfterFromDate && isBeforeToDate;
   });
-
-  const handleSort = (key: keyof (typeof exams)[0]) => {
-    let direction = "asc";
-
-    if (sortConfig.key === key && sortConfig.direction === "asc") {
-      direction = "desc";
-    }
-    setSortConfig({ key, direction });
-
-    const sortedData = [...exams].sort((a, b) => {
-      const aValue = a[key] ?? "";
-      const bValue = b[key] ?? "";
-
-      if (aValue < bValue) {
-        return direction === "asc" ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-
-    setExams(sortedData);
-  };
-
-  const getExamRowStyle = (examDate: string) => {
-    const today = new Date();
-    const examDateTime = new Date(examDate);
-    const diffDays = Math.ceil(
-      (examDateTime.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    );
-
-    if (diffDays <= 3 && diffDays > 0) {
-      return "bg-green-900 hover:bg-green-800";
-    } else if (diffDays < 0) {
-      return "bg-red-900 hover:bg-red-800";
-    }
-    return "";
-  };
 
   return (
     <div className="w-full p-6 bg-background">
@@ -106,14 +98,46 @@ export default function CreditsList({ data, isLoading }: Props) {
               Управляйте зачетами в системе.
             </p>
           </div>
-          <div className="relative flex items-center">
+          <div className="flex space-x-2">
             <Input
-              className="w-[500px]"
+              className="w-[300px]"
               placeholder="Поиск..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <Search className="absolute right-4 top-1.5 opacity-15" />
+            <Input
+              className="w-[150px]"
+              type="date"
+              value={dateRange.from}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, from: e.target.value })
+              }
+              placeholder="От"
+            />
+            <Input
+              className="w-[150px]"
+              type="date"
+              value={dateRange.to}
+              onChange={(e) =>
+                setDateRange({ ...dateRange, to: e.target.value })
+              }
+              placeholder="До"
+            />
+            <Select
+              value={selectedGroup}
+              onValueChange={(value) => setSelectedGroup(value)}
+            >
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="Группа" />
+              </SelectTrigger>
+              <SelectContent>
+                {groups.map((group) => (
+                  <SelectItem key={group} value={group}>
+                    {group}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <AddNewCredit />
         </div>
@@ -123,15 +147,11 @@ export default function CreditsList({ data, isLoading }: Props) {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-12">#</TableHead>
-                <TableHead onClick={() => handleSort("discipline")}>
-                  Дисциплина
-                </TableHead>
-                <TableHead onClick={() => handleSort("holding_date")}>
-                  Дата
-                </TableHead>
-                <TableHead onClick={() => handleSort("curator")}>
-                  Преподаватель
-                </TableHead>
+                <TableHead>Дисциплина</TableHead>
+                <TableHead>Дата</TableHead>
+                <TableHead>Преподаватель</TableHead>
+                <TableHead>Группа</TableHead>
+                <TableHead>Ссылка на билеты</TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
@@ -153,19 +173,26 @@ export default function CreditsList({ data, isLoading }: Props) {
                     </TableRow>
                   ))
               ) : filteredCredits.length > 0 ? (
-                filteredCredits.map((exams, index) => (
-                  <TableRow
-                    key={exams.id}
-                    className={getExamRowStyle(exams.holding_date)}
-                  >
+                filteredCredits.map((exam, index) => (
+                  <TableRow key={exam.id}>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{exams.discipline}</TableCell>
+                    <TableCell>{exam.discipline}</TableCell>
                     <TableCell>
-                      {format(new Date(exams.holding_date), "yyyy-MM-dd")}
+                      {format(new Date(exam.holding_date), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell>
-                      {exams.curator.last_name} {exams.curator.first_name}{" "}
-                      {exams.curator.patronymic}
+                      {exam.curator.last_name} {exam.curator.first_name}{" "}
+                      {exam.curator.patronymic}
+                    </TableCell>
+                    <TableCell>{exam.group.name}</TableCell>
+                    <TableCell>
+                      {exam.link === null ? (
+                        <Badge>Билеты не прикреплены</Badge>
+                      ) : (
+                        <Link href={exam.link} target="_blank">
+                          <Badge>Ссылка на билеты</Badge>
+                        </Link>
+                      )}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -176,15 +203,18 @@ export default function CreditsList({ data, isLoading }: Props) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <AddMark
-                              groupId={exams.group.id}
-                              examId={exams.id}
-                            />
+                            <AddMark groupId={exam.group.id} examId={exam.id} />
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link href={`/admin/exams/${exams.id}`}>
+                            <Link href={`/admin/exams/${exam.id}`}>
                               <Button variant="link">Просмотр оценок</Button>
                             </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <AddLinkExam examId={exam.id} />
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <DeleteExam id={exam.id} />
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

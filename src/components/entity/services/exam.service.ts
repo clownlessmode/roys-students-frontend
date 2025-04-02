@@ -20,6 +20,21 @@ class ExamService {
     });
     return response.data;
   }
+
+  static async addLink(id: string, dto: { link: string }) {
+    const response = await baseApi.patch(`/exams/${id}/link`, dto, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+    return response.data;
+  }
+  static async deleteExamen(id: string) {
+    const response = await baseApi.delete(`/exams/${id}`, {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    });
+    return response.data;
+  }
 }
 
 export default ExamService;

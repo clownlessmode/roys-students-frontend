@@ -10,31 +10,29 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
 import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Controller, SubmitHandler, useForm } from "react-hook-form";
-import { useStudentController } from "../entity/controllers/student.controller";
 import { Skeleton } from "../ui/skeleton";
-import { Student } from "../entity/types/student.interface";
+import { useStudentController } from "../entity/controllers/student.controller";
 import { useMarkController } from "../entity/controllers/mark.controller";
 import Spinner from "../ui/Spinner";
+import { Student } from "../entity/types/student.interface";
 
 interface Props {
   groupId: string;
-  examId: string;
-}
-
-interface ScoreFormDto {
-  mark: number;
-  studentId: string;
   examId: string;
 }
 
@@ -44,18 +42,29 @@ export function AddMark({ groupId, examId }: Props) {
   const { data: students } = useStudentsByGroupId(groupId);
   const { createMark, isCreatingMark } = useMarkController();
 
-  const {
-    control,
-    reset,
-    handleSubmit,
-    formState: { isValid },
-  } = useForm<ScoreFormDto>({
-    mode: "onChange",
-  });
+  const [marks, setMarks] = React.useState<Record<string, string>>({});
 
-  const onSubmit: SubmitHandler<ScoreFormDto> = async (data) => {
-    await createMark({ ...data, examId: examId });
-    reset();
+  const handleMarkChange = (studentId: string, value: string) => {
+    setMarks((prev) => ({
+      ...prev,
+      [studentId]: value,
+    }));
+  };
+
+  const handleSubmit = async () => {
+    const entries = Object.entries(marks);
+
+    for (const [studentId, mark] of entries) {
+      if (mark) {
+        await createMark({
+          studentId,
+          mark,
+          examId,
+        });
+      }
+    }
+
+    setMarks({});
     setIsOpen(false);
   };
 
@@ -63,98 +72,78 @@ export function AddMark({ groupId, examId }: Props) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" className="w-full">
-          Выставить оценку
+          Выставить оценки
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Выставить оценку</DialogTitle>
+          <DialogTitle>Выставление оценок</DialogTitle>
           <DialogDescription>
-            Заполните форму для выставления оценок за экзамен.
+            Выберите оценки для студентов и сохраните одним кликом.
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="student_id">Выбрать студента</Label>
-            <Controller
-              name="studentId"
-              control={control}
-              rules={{ required: "Выберите студента" }}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger className="">
-                    <SelectValue placeholder="Выберите студента" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Студент</SelectLabel>
-                      {!students?.data ? (
-                        Array(3)
-                          .fill(0)
-                          .map((_, index) => (
-                            <div
-                              key={`loading-${index}`}
-                              className="flex items-center gap-2 py-2"
-                            >
-                              <Skeleton className="w-8 h-8 rounded-full" />
-                              <Skeleton className="w-32 h-4" />
-                            </div>
-                          ))
-                      ) : students.data.length > 0 ? (
-                        students.data.map((student: Student) => (
-                          <SelectItem key={student.id} value={student.id}>
-                            {student.last_name} {student.first_name}{" "}
-                            {student.patronymic}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <div className="text-center py-4 text-muted-foreground">
-                          Студенты не найдены
-                        </div>
-                      )}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
+        {students?.data ? (
+          <div className="max-h-[400px] overflow-auto border rounded-md">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ФИО</TableHead>
+                  <TableHead className="w-[150px]">Оценка</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {students.data.map((student: Student) => (
+                  <TableRow key={student.id}>
+                    <TableCell>
+                      {student.last_name} {student.first_name}{" "}
+                      {student.patronymic}
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={marks[student.id] || ""}
+                        onValueChange={(value) =>
+                          handleMarkChange(student.id, value)
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Выбрать" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["Н/А", "2", "3", "4", "5"].map((mark) => (
+                            <SelectItem key={mark} value={mark}>
+                              {mark}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="mark">Оценка</Label>
-            <Controller
-              name="mark"
-              control={control}
-              rules={{ required: "Выберите оценку" }}
-              render={({ field }) => (
-                <Select
-                  onValueChange={(value) => field.onChange(Number(value))}
-                  value={field.value ? String(field.value) : ""}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Оценка" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>Оценка</SelectLabel>
-                      {[2, 3, 4, 5].map((num) => (
-                        <SelectItem key={num} value={String(num)}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              )}
-            />
+        ) : (
+          <div className="space-y-2">
+            {Array(5)
+              .fill(0)
+              .map((_, idx) => (
+                <div key={idx} className="flex gap-4 items-center">
+                  <Skeleton className="h-6 w-48" />
+                  <Skeleton className="h-6 w-24" />
+                </div>
+              ))}
           </div>
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={!isValid || isCreatingMark}
-          >
-            {isCreatingMark ? <Spinner /> : "Выставить оценку"}
-          </Button>
-        </form>
+        )}
+
+        <Button
+          onClick={handleSubmit}
+          disabled={isCreatingMark || Object.keys(marks).length === 0}
+          className="w-full mt-4"
+        >
+          {isCreatingMark ? <Spinner /> : "Сохранить оценки"}
+        </Button>
       </DialogContent>
     </Dialog>
   );
