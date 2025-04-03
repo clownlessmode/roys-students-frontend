@@ -102,16 +102,18 @@ export default function StudentProfile({ student }: StudentCardProps) {
               className="w-full justify-start text-base font-normal"
             >
               <File className="mr-2 h-4 w-4" />
-              Паспорт (серия):{" "}
-              {student.passport ? student.passport.slice(0, 4) : "Не указан"}
+              Телефон:{" "}
+              {student.passport
+                ? student.passport.split(" ")[0]
+                : "Нет данных"}{" "}
             </Badge>
             <Badge
               variant="outline"
               className="w-full justify-start text-base font-normal"
             >
               <File className="mr-2 h-4 w-4" />
-              Паспорт (номер):{" "}
-              {student.passport ? student.passport.slice(5) : "Не указан"}
+              Почта:{" "}
+              {student.passport ? student.passport.split(" ")[1] : "Нет данных"}
             </Badge>
             <Badge
               variant="outline"
@@ -138,13 +140,7 @@ export default function StudentProfile({ student }: StudentCardProps) {
                   })}`
                 : "Нет данных"}
             </Badge>
-            <Badge
-              variant="outline"
-              className="w-full justify-start text-base font-normal"
-            >
-              <UserRound className="mr-2 h-4 w-4" />
-              Пол: {student.gender || "Не указан"}
-            </Badge>
+
             <EditMe student={student} id={student.id} />
             <Button
               onClick={() => handleLogout()}

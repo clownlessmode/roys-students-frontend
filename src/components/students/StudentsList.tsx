@@ -119,6 +119,8 @@ export default function StudentsList({ data, isLoading }: Props) {
                   ФИО
                 </TableHead>
                 <TableHead onClick={() => handleSort("snils")}>СНИЛС</TableHead>
+                <TableHead>Телефон</TableHead>
+                <TableHead>Почта</TableHead>
                 <TableHead onClick={() => handleSort("birthdate")}>
                   Дата рождения
                 </TableHead>
@@ -159,6 +161,16 @@ export default function StudentsList({ data, isLoading }: Props) {
                     </TableCell>
                     <TableCell>
                       {student.snils ? student.snils : "Нет данных"}
+                    </TableCell>
+                    <TableCell>
+                      {student.passport
+                        ? student.passport.split(" ")[0]
+                        : "Нет данных"}
+                    </TableCell>
+                    <TableCell>
+                      {student.passport
+                        ? student.passport.split(" ")[1]
+                        : "Нет данных"}
                     </TableCell>
                     <TableCell>
                       {student.birthdate

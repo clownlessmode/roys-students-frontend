@@ -175,15 +175,15 @@ export function UpdateStudent({ id, student }: Props) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="passport">Паспорт (серия)</Label>
+            <Label htmlFor="passport">Номер телефона</Label>
             <Input
               id="passport"
               type="text"
-              placeholder="Введите паспортные данные студента"
+              placeholder="Введите телефон студента"
               {...register("passportSeriya", {
                 maxLength: {
-                  value: 4,
-                  message: "Максимум 4 цифры",
+                  value: 11,
+                  message: "Максимум 11 цифр",
                 },
               })}
             />
@@ -194,17 +194,12 @@ export function UpdateStudent({ id, student }: Props) {
             )}
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="passport">Паспорт (номер)</Label>
+            <Label htmlFor="passport">Почта</Label>
             <Input
               id="passport"
-              type="text"
-              placeholder="Введите паспортные данные студента"
-              {...register("passportNomer", {
-                maxLength: {
-                  value: 6,
-                  message: "Максимум 6 цифр",
-                },
-              })}
+              type="email"
+              placeholder="Введите почту студента"
+              {...register("passportNomer")}
             />
             {errors.passportNomer && (
               <p className="text-red-500 text-sm">
