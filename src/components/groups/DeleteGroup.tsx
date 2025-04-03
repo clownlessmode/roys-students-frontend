@@ -14,13 +14,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "../ui/button";
-import { useCuratorController } from "../entity/controllers/curator.controller";
 import Spinner from "../ui/Spinner";
+import { useGroupController } from "../entity/controllers/group.controller";
 export default function DeleteGroup({ id }: Props) {
-  const { deleteCurator, isDeletingCurator } = useCuratorController();
+  const { deleteGroup, isDeletingGroup } = useGroupController();
 
   const onSubmit = async () => {
-    await deleteCurator({ id });
+    await deleteGroup({ id });
   };
   return (
     <AlertDialog>
@@ -34,13 +34,13 @@ export default function DeleteGroup({ id }: Props) {
           <AlertDialogTitle>Вы уверены?</AlertDialogTitle>
           <AlertDialogDescription>
             Это действие не может быть отменено. Это навсегда удалит запись
-            преподавателя с наших серверов.
+            группы с наших серверов.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Отмена</AlertDialogCancel>
-          <AlertDialogAction onClick={onSubmit} disabled={isDeletingCurator}>
-            {isDeletingCurator ? <Spinner /> : "Удалить преподавателя"}
+          <AlertDialogAction onClick={onSubmit} disabled={isDeletingGroup}>
+            {isDeletingGroup ? <Spinner /> : "Удалить группу"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
