@@ -4,7 +4,8 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const role = req.cookies.get("role")?.value;
   const requestedPath = req.nextUrl.pathname;
-
+  console.log("ROLE", role);
+  console.log("PATH", requestedPath);
   // Исключаем маршруты, которые не требуют проверки
   const publicRoutes = ["/login", "/api/auth", "/"]; // Добавьте другие маршруты, если нужно
   if (publicRoutes.some((route) => requestedPath.startsWith(route))) {
@@ -14,7 +15,7 @@ export function middleware(req: NextRequest) {
   // Маршруты, разрешённые для каждой роли
   const routesForRoles: Record<string, (string | RegExp)[]> = {
     student: ["/student", "/common"],
-    curator: ["/curator", "/common"],
+    curator: ["/curator", "/common", /^\/curator\/.*/],
     admin: ["/admin", "/curator", "/student", "/common", /^\/admin\/.*/],
   };
 

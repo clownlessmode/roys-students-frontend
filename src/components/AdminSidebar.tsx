@@ -16,21 +16,33 @@ import {
   SidebarFooter,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useRouter } from "next/navigation";
 
 export function AdminSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const [login, setLogin] = React.useState<string | null>(null);
+  const [role, setRole] = React.useState<string | null>(null);
+  const router = useRouter();
 
   // Используем useEffect, чтобы выполнить код только на клиенте
   React.useEffect(() => {
+    const storedRole = localStorage.getItem("role");
     const storedLogin = localStorage.getItem("login");
     setLogin(storedLogin);
+    setRole(storedRole);
+
+    console.log(storedRole);
+    if (storedRole !== "admin") {
+      router.replace("/login");
+    }
   }, []);
+
+  console.log(role);
 
   const data = {
     user: {
-      name: "Администратор",
+      name: role === "curator" ? "Преподаватель" : "Администратор",
       email: login || "",
       avatar: login || "",
     },

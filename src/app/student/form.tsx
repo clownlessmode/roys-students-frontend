@@ -32,7 +32,9 @@ export default function StudentProfile({ student }: StudentCardProps) {
   const router = useRouter();
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("login");
+    localStorage.removeItem("adminadmin");
+    localStorage.removeItem("role");
     router.push(`/login`);
   };
 

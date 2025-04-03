@@ -33,6 +33,7 @@ export default function GroupsList({ data, isLoading }: Props) {
 
   useEffect(() => {
     setGroups(data || []); // Обновление состояния при изменении data
+    console.log(data);
   }, [data]);
 
   // Фильтрация студентов по запросу поиска
